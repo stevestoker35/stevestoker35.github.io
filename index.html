@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steve's Game Library</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a1a;
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    text-align: center;
+    padding: 50px 20px 30px;
+    background: linear-gradient(180deg, #1a1a3a 0%, #0a0a1a 100%);
+  }
+  header h1 {
+    font-size: 48px;
+    background: linear-gradient(90deg, #ff4444, #ffaa00, #44ddff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+  header p {
+    color: #888;
+    font-size: 18px;
+  }
+  .game-count {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 16px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+    font-size: 14px;
+    color: #aaa;
+  }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 24px;
+  }
+
+  .game-card {
+    background: linear-gradient(145deg, #1a1a2e, #16162a);
+    border: 2px solid #2a2a4a;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    cursor: pointer;
+    text-decoration: none;
+    color: #fff;
+    display: block;
+  }
+  .game-card:hover {
+    transform: translateY(-6px);
+    border-color: #4444aa;
+    box-shadow: 0 12px 40px rgba(68, 68, 170, 0.25);
+  }
+
+  .game-preview {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-preview canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .game-info {
+    padding: 20px;
+  }
+  .game-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+  .game-desc {
+    color: #999;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .game-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .tag-action { background: rgba(255,68,68,0.2); color: #ff6666; }
+  .tag-arcade { background: rgba(68,221,255,0.2); color: #44ddff; }
+  .tag-shooter { background: rgba(255,170,0,0.2); color: #ffaa00; }
+  .tag-rescue { background: rgba(68,255,100,0.2); color: #44ff66; }
+
+  .play-btn {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #4444aa, #6644cc);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    transition: background 0.2s;
+  }
+  .game-card:hover .play-btn {
+    background: linear-gradient(135deg, #5555cc, #8855ee);
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px;
+    color: #444;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>STEVE'S GAME LIBRARY</h1>
+  <p>Browser games you can play right now</p>
+  <div class="game-count" id="gameCount"></div>
+</header>
+
+<div class="games-grid" id="gamesGrid"></div>
+
+<footer>
+  Built by stevestoker35
+</footer>
+
+<script>
+const GAMES = [
+  {
+    title: "Helicopter & Plane Battle",
+    desc: "Choose a helicopter or plane and fight waves of enemies! Earn coins, buy skins and weapons. Bosses every 3 waves with new enemy types each wave.",
+    url: "https://stevestoker35.github.io/helicopter-battle/",
+    tags: ["action", "shooter"],
+    colors: { bg1: "#0a1628", bg2: "#1a2a4a", accent: "#ff4444" },
+    drawPreview: function(ctx, w, h, t) {
+      // Sky
+      let grad = ctx.createLinearGradient(0,0,0,h);
+      grad.addColorStop(0, "#0a1628"); grad.addColorStop(1, "#1a3050");
+      ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+      // Stars
+      for(let i=0;i<15;i++){ctx.fillStyle=`rgba(255,255,255,${0.3+Math.random()*0.5})`;ctx.beginPath();ctx.arc((i*67+t*0.2)%w,((i*43)%h)*0.6,1,0,Math.PI*2);ctx.fill();}
+      // Water
+      ctx.fillStyle = "rgba(20,60,100,0.6)";
+      ctx.fillRect(0, h*0.8, w, h*0.2);
+      // Helicopter
+      let hx = w*0.3 + Math.sin(t*0.02)*20, hy = h*0.35 + Math.sin(t*0.03)*10;
+      ctx.fillStyle = "#3388dd";
+      ctx.beginPath(); ctx.ellipse(hx,hy,22,10,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#66ccff";
+      ctx.beginPath(); ctx.ellipse(hx+8,hy-2,7,5,0.2,0,Math.PI*2); ctx.fill();
+      // Rotor
+      ctx.strokeStyle = "rgba(200,200,200,0.4)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(hx-25+Math.cos(t*0.4)*25,hy-12); ctx.lineTo(hx+25-Math.cos(t*0.4)*25,hy-12); ctx.stroke();
+      // Bullets
+      ctx.fillStyle = "#44ddff"; ctx.shadowColor = "#44ddff"; ctx.shadowBlur = 6;
+      for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(hx+40+i*25+(t*3)%60,hy+(i-1)*8,3,0,Math.PI*2);ctx.fill();}
+      ctx.shadowBlur=0;
+      // Enemy jet
+      let ex = w*0.75 + Math.sin(t*0.015)*30, ey = h*0.3 + Math.sin(t*0.025)*20;
+      ctx.fillStyle = "#cc3333";
+      ctx.beginPath(); ctx.moveTo(ex+20,ey); ctx.lineTo(ex-15,ey-8); ctx.lineTo(ex-20,ey); ctx.lineTo(ex-15,ey+8); ctx.closePath(); ctx.fill();
+      // Explosion particles
+      if(Math.sin(t*0.05)>0.8){for(let i=0;i<5;i++){ctx.fillStyle=["#ff4400","#ffcc00","#fff"][i%3];ctx.beginPath();ctx.arc(ex-10+Math.cos(i+t*0.1)*15,ey+Math.sin(i+t*0.1)*15,2+Math.random()*2,0,Math.PI*2);ctx.fill();}}
+    }
+  },
+  {
+    title: "Helicopter Rescue",
+    desc: "Fly your helicopter on a daring rescue mission! Navigate obstacles and save people.",
+    url: "https://stevestoker35.github.io/helicopter-game/",
+    tags: ["arcade", "rescue"],
+    colors: { bg1: "#0a2818", bg2: "#1a4a2a", accent: "#44ff66" },
+    drawPreview: function(ctx, w, h, t) {
+      // Sky
+      let grad = ctx.createLinearGradient(0,0,0,h);
+      grad.addColorStop(0, "#1a5a8a"); grad.addColorStop(1, "#88ccee");
+      ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+      // Clouds
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      for(let i=0;i<4;i++){ctx.beginPath();ctx.arc((i*120+t*0.5+50)%w,30+i*25,20+i*5,0,Math.PI*2);ctx.fill();}
+      // Ground
+      ctx.fillStyle = "#3a8a3a";
+      ctx.fillRect(0, h*0.8, w, h*0.2);
+      // Buildings
+      ctx.fillStyle = "#555";
+      ctx.fillRect(w*0.15,h*0.55,30,h*0.25);
+      ctx.fillRect(w*0.55,h*0.5,35,h*0.3);
+      ctx.fillRect(w*0.8,h*0.6,25,h*0.2);
+      // Helicopter
+      let hx = w*0.4 + Math.sin(t*0.025)*40, hy = h*0.35 + Math.sin(t*0.035)*15;
+      ctx.fillStyle = "#44aa44";
+      ctx.beginPath(); ctx.ellipse(hx,hy,20,9,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#88eeff";
+      ctx.beginPath(); ctx.ellipse(hx+7,hy-1,6,4,0.2,0,Math.PI*2); ctx.fill();
+      // Rotor
+      ctx.strokeStyle = "rgba(200,200,200,0.5)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(hx-22+Math.cos(t*0.5)*22,hy-10); ctx.lineTo(hx+22-Math.cos(t*0.5)*22,hy-10); ctx.stroke();
+      // Rope
+      ctx.strokeStyle = "#ffcc00"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(hx,hy+9); ctx.lineTo(hx+Math.sin(t*0.04)*5,hy+30); ctx.stroke();
+      // Person
+      ctx.fillStyle = "#ffcc00"; ctx.beginPath(); ctx.arc(hx+Math.sin(t*0.04)*5,hy+34,4,0,Math.PI*2); ctx.fill();
+    }
+  }
+];
+
+// Render game cards
+const grid = document.getElementById('gamesGrid');
+document.getElementById('gameCount').textContent = GAMES.length + ' games available';
+
+const canvases = [];
+
+GAMES.forEach((game, idx) => {
+  const card = document.createElement('a');
+  card.className = 'game-card';
+  card.href = game.url;
+  card.target = '_blank';
+
+  const preview = document.createElement('div');
+  preview.className = 'game-preview';
+  const cvs = document.createElement('canvas');
+  cvs.width = 400; cvs.height = 200;
+  preview.appendChild(cvs);
+  canvases.push({ canvas: cvs, draw: game.drawPreview });
+
+  const info = document.createElement('div');
+  info.className = 'game-info';
+
+  let tagsHtml = game.tags.map(t => `<span class="tag tag-${t}">${t.toUpperCase()}</span>`).join('');
+
+  info.innerHTML = `
+    <div class="game-title">${game.title}</div>
+    <div class="game-desc">${game.desc}</div>
+    <div class="game-tags">${tagsHtml}</div>
+    <div class="play-btn">PLAY NOW</div>
+  `;
+
+  card.appendChild(preview);
+  card.appendChild(info);
+  grid.appendChild(card);
+});
+
+// Animate previews
+let animTime = 0;
+function animate() {
+  animTime++;
+  canvases.forEach(c => {
+    const ctx = c.canvas.getContext('2d');
+    c.draw(ctx, c.canvas.width, c.canvas.height, animTime);
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
